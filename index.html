@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello World</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f4f4f9;
+    transition: background-color 0.3s ease;
+  }
+
+  h1 {
+    font-size: 4rem;
+    color: #222;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  button {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+  <h1>Hello World</h1>
+  <button id="colorBtn">Change Background Color</button>
+
+  <script>
+    const button = document.getElementById('colorBtn');
+
+    function getRandomColor() {
+      const r = Math.floor(Math.random() * 256);
+      const g = Math.floor(Math.random() * 256);
+      const b = Math.floor(Math.random() * 256);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    button.addEventListener('click', () => {
+      document.body.style.backgroundColor = getRandomColor();
+    });
+  </script>
+</body>
+</html>
