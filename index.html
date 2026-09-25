@@ -265,6 +265,29 @@
     font-weight: 700;
   }
 
+  .easter-egg-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 24, 48, 0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+  }
+
+  .easter-egg-overlay.visible {
+    display: flex;
+  }
+
+  .easter-egg-overlay img {
+    max-width: min(90vw, 500px);
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 4px solid var(--fsu-red);
+  }
+
   @media (max-width: 640px) {
     .teams {
       grid-template-columns: 1fr;
@@ -357,6 +380,10 @@
     <div class="win-call" id="winCall"></div>
   </div>
 
+  <div class="easter-egg-overlay" id="easterEgg">
+    <img src="https://www.realitytea.com/wp-content/uploads/sites/6/2026/08/Travis-Kelce-and-Taylor-Swift-1.jpg" alt="Easter egg">
+  </div>
+
   <script>
     function getValue(id) {
       const value = parseFloat(document.getElementById(id).value);
@@ -410,6 +437,14 @@
       }
 
       document.getElementById('result').classList.add('visible');
+    });
+
+    const easterEgg = document.getElementById('easterEgg');
+    document.getElementById('predictBtn').addEventListener('dblclick', () => {
+      easterEgg.classList.add('visible');
+    });
+    easterEgg.addEventListener('click', () => {
+      easterEgg.classList.remove('visible');
     });
   </script>
 </body>
