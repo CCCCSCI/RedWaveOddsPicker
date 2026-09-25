@@ -131,22 +131,27 @@
 
     function getRandomColor() {
       const hue = Math.floor(Math.random() * 360);
-      const saturation = Math.floor(Math.random() * 51) + 50;
-      const lightness = Math.floor(Math.random() * 31) + 35;
+      const saturation = 60 + Math.floor(Math.random() * 25);
+      const lightness = 35 + Math.floor(Math.random() * 25);
       return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
     }
 
     function getComplementaryTextColor() {
       const currentBg = getComputedStyle(document.body).backgroundColor;
       const [r, g, b] = currentBg.match(/\d+/g).map(Number);
-      const { h, l } = rgbToHsl(r, g, b);
-      // Split-complementary hue avoids the harsh clash of an exact 180° opposite
-      const hueOffset = Math.floor(Math.random() * 61) - 30;
-      const complementaryHue = (h + 150 + hueOffset + 360) % 360;
-      const saturation = Math.floor(Math.random() * 26) + 55;
-      // Push lightness away from the background's lightness so the text stays readable
-      const lightness = l > 50 ? Math.floor(Math.random() * 21) + 20 : Math.floor(Math.random() * 21) + 65;
-      return `hsl(${complementaryHue}, ${saturation}%, ${lightness}%)`;
+      const { h, s, l } = rgbToHsl(r, g, b);
+
+      const complementaryHue = (h + 180) % 360;
+      const textSaturation = clamp(Math.round(s * 0.95 + 10), 60, 85);
+      const textLightness = l > 55
+        ? clamp(Math.round(l - 18), 30, 55)
+        : clamp(Math.round(l + 18), 40, 70);
+
+      return `hsl(${complementaryHue}, ${textSaturation}%, ${textLightness}%)`;
     }
 
     backgroundButton.addEventListener('click', () => {
