@@ -3,164 +3,413 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello World</title>
+<title>Fresno State Win Predictor</title>
 <style>
+  :root {
+    --fsu-red: #C41230;
+    --fsu-navy: #13284C;
+    --field-green: #1f6b3a;
+    --field-green-dark: #1a5c31;
+  }
+
   * {
     box-sizing: border-box;
   }
 
   html, body {
-    height: 100%;
     margin: 0;
+    min-height: 100%;
   }
 
   body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    min-height: 100vh;
     font-family: 'Segoe UI', Arial, sans-serif;
-    background-color: #f4f4f9;
-    transition: background-color 0.3s ease;
+    background: linear-gradient(180deg, var(--fsu-navy) 0%, #0b1830 100%);
+    color: #fff;
+    padding: 2rem 1rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   h1 {
-    font-size: 4rem;
-    color: #222;
-    margin-bottom: 1.5rem;
     text-align: center;
+    margin: 0 0 0.25rem;
+    font-size: 2.2rem;
+    letter-spacing: 0.5px;
   }
 
-  .button-row {
+  h1 span {
+    color: var(--fsu-red);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #c9d3e3;
+    margin: 0 0 2rem;
+    font-size: 0.95rem;
+  }
+
+  .field-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    border: 6px solid #0b1830;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--field-green) 0px,
+        var(--field-green) 40px,
+        var(--field-green-dark) 40px,
+        var(--field-green-dark) 80px
+      );
+    min-height: 260px;
+    position: relative;
+  }
+
+  .endzone {
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+
+  .endzone.fsu {
+    background: var(--fsu-red);
+    transform: rotate(180deg);
+  }
+
+  .endzone.visitor {
+    background: var(--fsu-navy);
+  }
+
+  .midfield {
+    position: relative;
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
-  button {
-    padding: 0.75rem 2rem;
-    font-size: 1.1rem;
+  .midfield::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateX(-50%);
+  }
+
+  .yard-marker {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    font-size: 1.4rem;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 0.2rem 0.7rem;
+    border-radius: 6px;
+    z-index: 1;
+  }
+
+  .teams {
+    width: 100%;
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.75rem;
+  }
+
+  .team-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    border-top: 5px solid var(--fsu-red);
+  }
+
+  .team-card.visitor {
+    border-top-color: #3a5a8c;
+  }
+
+  .team-card h2 {
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .team-card.fsu h2 {
+    color: var(--fsu-red);
+  }
+
+  .team-card.visitor h2 {
+    color: #7fa0d6;
+  }
+
+  .field-input {
+    margin-bottom: 0.85rem;
+  }
+
+  .field-input label {
+    display: block;
+    font-size: 0.8rem;
+    color: #c9d3e3;
+    margin-bottom: 0.3rem;
+  }
+
+  .field-input input {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    color: #13284C;
+    font-size: 0.95rem;
+  }
+
+  .field-input input:focus {
+    outline: 2px solid var(--fsu-red);
+  }
+
+  .predict-btn {
+    margin-top: 2rem;
+    padding: 0.9rem 2.5rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     border: none;
-    border-radius: 8px;
-    background-color: #333;
+    border-radius: 999px;
+    background: var(--fsu-red);
     color: #fff;
     cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.2s ease;
+    box-shadow: 0 6px 16px rgba(196, 18, 48, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  button:hover {
+  .predict-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(196, 18, 48, 0.55);
   }
 
-  button:active {
+  .predict-btn:active {
     transform: translateY(0);
+  }
+
+  .result {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: none;
+  }
+
+  .result.visible {
+    display: block;
+  }
+
+  .result h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+    color: #c9d3e3;
+    font-weight: 400;
+  }
+
+  .odds-bar {
+    width: 100%;
+    height: 26px;
+    border-radius: 13px;
+    overflow: hidden;
+    display: flex;
+    background: var(--fsu-navy);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .odds-bar .fsu-fill {
+    background: var(--fsu-red);
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+
+  .odds-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .odds-labels .fsu-label {
+    color: var(--fsu-red);
+  }
+
+  .odds-labels .visitor-label {
+    color: #7fa0d6;
+  }
+
+  .win-call {
+    margin-top: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .teams {
+      grid-template-columns: 1fr;
+    }
+
+    .field {
+      grid-template-columns: 60px 1fr 60px;
+    }
+
+    .endzone {
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
   }
 </style>
 </head>
 <body>
-  <h1>Hello World</h1>
-  <div class="button-row">
-    <button id="colorBtn">Change Background Color</button>
-    <button id="textColorBtn">Change Text to Complementary Color</button>
+  <h1><span>Fresno State</span> Win Predictor</h1>
+  <p class="subtitle">Enter each team's stats and predict the odds of a Bulldogs victory</p>
+
+  <div class="field-wrapper">
+    <div class="field">
+      <div class="endzone fsu">FRESNO STATE</div>
+      <div class="midfield"><span class="yard-marker">50</span></div>
+      <div class="endzone visitor">VISITOR</div>
+    </div>
+  </div>
+
+  <div class="teams">
+    <div class="team-card fsu">
+      <h2>Fresno State</h2>
+      <div class="field-input">
+        <label for="fsu-off-yards">Total Offensive Yards</label>
+        <input type="number" id="fsu-off-yards" placeholder="e.g. 420">
+      </div>
+      <div class="field-input">
+        <label for="fsu-def-yards">Total Defensive Yards Allowed</label>
+        <input type="number" id="fsu-def-yards" placeholder="e.g. 340">
+      </div>
+      <div class="field-input">
+        <label for="fsu-points-for">Points For</label>
+        <input type="number" id="fsu-points-for" placeholder="e.g. 28">
+      </div>
+      <div class="field-input">
+        <label for="fsu-points-against">Points Against</label>
+        <input type="number" id="fsu-points-against" placeholder="e.g. 17">
+      </div>
+      <div class="field-input">
+        <label for="fsu-turnovers">Offensive Turnovers</label>
+        <input type="number" id="fsu-turnovers" placeholder="e.g. 1">
+      </div>
+    </div>
+
+    <div class="team-card visitor">
+      <h2>Visiting Team</h2>
+      <div class="field-input">
+        <label for="vis-off-yards">Total Offensive Yards</label>
+        <input type="number" id="vis-off-yards" placeholder="e.g. 380">
+      </div>
+      <div class="field-input">
+        <label for="vis-def-yards">Total Defensive Yards Allowed</label>
+        <input type="number" id="vis-def-yards" placeholder="e.g. 360">
+      </div>
+      <div class="field-input">
+        <label for="vis-points-for">Points For</label>
+        <input type="number" id="vis-points-for" placeholder="e.g. 24">
+      </div>
+      <div class="field-input">
+        <label for="vis-points-against">Points Against</label>
+        <input type="number" id="vis-points-against" placeholder="e.g. 21">
+      </div>
+      <div class="field-input">
+        <label for="vis-turnovers">Offensive Turnovers</label>
+        <input type="number" id="vis-turnovers" placeholder="e.g. 2">
+      </div>
+    </div>
+  </div>
+
+  <button class="predict-btn" id="predictBtn">Predict the Odds</button>
+
+  <div class="result" id="result">
+    <h3>Estimated Win Probability</h3>
+    <div class="odds-bar">
+      <div class="fsu-fill" id="fsuFill" style="width: 50%;"></div>
+    </div>
+    <div class="odds-labels">
+      <span class="fsu-label" id="fsuPct">FSU 50%</span>
+      <span class="visitor-label" id="visPct">Visitor 50%</span>
+    </div>
+    <div class="win-call" id="winCall"></div>
   </div>
 
   <script>
-    const backgroundButton = document.getElementById('colorBtn');
-    const textButton = document.getElementById('textColorBtn');
-    const title = document.querySelector('h1');
+    function getValue(id) {
+      const value = parseFloat(document.getElementById(id).value);
+      return Number.isNaN(value) ? 0 : value;
+    }
 
-    function hslToRgb(h, s, l) {
-      s /= 100;
-      l /= 100;
+    // Simple heuristic rating: rewards yardage and point margins, penalizes turnovers
+    function computeRating(offYards, defYardsAllowed, pointsFor, pointsAgainst, turnovers) {
+      const yardMargin = offYards - defYardsAllowed;
+      const pointMargin = pointsFor - pointsAgainst;
+      return (yardMargin * 0.05) + (pointMargin * 1.5) - (turnovers * 4);
+    }
 
-      const c = (1 - Math.abs(2 * l - 1)) * s;
-      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-      const m = l - c / 2;
+    document.getElementById('predictBtn').addEventListener('click', () => {
+      const fsuRating = computeRating(
+        getValue('fsu-off-yards'),
+        getValue('fsu-def-yards'),
+        getValue('fsu-points-for'),
+        getValue('fsu-points-against'),
+        getValue('fsu-turnovers')
+      );
 
-      let r = 0;
-      let g = 0;
-      let b = 0;
+      const visRating = computeRating(
+        getValue('vis-off-yards'),
+        getValue('vis-def-yards'),
+        getValue('vis-points-for'),
+        getValue('vis-points-against'),
+        getValue('vis-turnovers')
+      );
 
-      if (h >= 0 && h < 60) {
-        r = c; g = x; b = 0;
-      } else if (h >= 60 && h < 120) {
-        r = x; g = c; b = 0;
-      } else if (h >= 120 && h < 180) {
-        r = 0; g = c; b = x;
-      } else if (h >= 180 && h < 240) {
-        r = 0; g = x; b = c;
-      } else if (h >= 240 && h < 300) {
-        r = x; g = 0; b = c;
+      const diff = fsuRating - visRating;
+      // Logistic curve converts the rating gap into a win probability
+      const fsuProbability = 1 / (1 + Math.exp(-diff / 25));
+      const fsuPercent = Math.min(99, Math.max(1, Math.round(fsuProbability * 100)));
+      const visPercent = 100 - fsuPercent;
+
+      document.getElementById('fsuFill').style.width = `${fsuPercent}%`;
+      document.getElementById('fsuPct').textContent = `FSU ${fsuPercent}%`;
+      document.getElementById('visPct').textContent = `Visitor ${visPercent}%`;
+
+      const winCall = document.getElementById('winCall');
+      if (fsuPercent > visPercent) {
+        winCall.textContent = "'Dogs favored to win! ????";
+        winCall.style.color = '#C41230';
+      } else if (visPercent > fsuPercent) {
+        winCall.textContent = 'Visiting team favored.';
+        winCall.style.color = '#7fa0d6';
       } else {
-        r = c; g = 0; b = x;
+        winCall.textContent = "Too close to call!";
+        winCall.style.color = '#fff';
       }
 
-      return `rgb(${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)})`;
-    }
-
-    function rgbToHsl(r, g, b) {
-      r /= 255;
-      g /= 255;
-      b /= 255;
-
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      let h;
-      const l = (max + min) / 2;
-      const d = max - min;
-      const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-
-      if (d === 0) {
-        h = 0;
-      } else if (max === r) {
-        h = 60 * (((g - b) / d) % 6);
-      } else if (max === g) {
-        h = 60 * ((b - r) / d + 2);
-      } else {
-        h = 60 * ((r - g) / d + 4);
-      }
-
-      return {
-        h: (h + 360) % 360,
-        s: s * 100,
-        l: l * 100
-      };
-    }
-
-    function getRandomColor() {
-      const hue = Math.floor(Math.random() * 360);
-      const saturation = 60 + Math.floor(Math.random() * 25);
-      const lightness = 35 + Math.floor(Math.random() * 25);
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    }
-
-    function clamp(value, min, max) {
-      return Math.min(Math.max(value, min), max);
-    }
-
-    function getComplementaryTextColor() {
-      const currentBg = getComputedStyle(document.body).backgroundColor;
-      const [r, g, b] = currentBg.match(/\d+/g).map(Number);
-      const { h, s, l } = rgbToHsl(r, g, b);
-
-      const complementaryHue = (h + 180) % 360;
-      const textSaturation = clamp(Math.round(s * 0.95 + 10), 60, 85);
-      const textLightness = l > 55
-        ? clamp(Math.round(l - 18), 30, 55)
-        : clamp(Math.round(l + 18), 40, 70);
-
-      return `hsl(${complementaryHue}, ${textSaturation}%, ${textLightness}%)`;
-    }
-
-    backgroundButton.addEventListener('click', () => {
-      const randomColor = getRandomColor();
-      document.body.style.backgroundColor = randomColor;
-    });
-
-    textButton.addEventListener('click', () => {
-      title.style.color = getComplementaryTextColor();
+      document.getElementById('result').classList.add('visible');
     });
   </script>
 </body>
