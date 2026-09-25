@@ -306,15 +306,15 @@
       </div>
       <div class="field-input">
         <label for="fsu-points-for">Points For</label>
-        <input type="number" id="fsu-points-for" placeholder="e.g. 28">
+        <input type="number" id="fsu-points-for" min="0" step="1" placeholder="e.g. 28">
       </div>
       <div class="field-input">
         <label for="fsu-points-against">Points Against</label>
-        <input type="number" id="fsu-points-against" placeholder="e.g. 17">
+        <input type="number" id="fsu-points-against" min="0" step="1" placeholder="e.g. 17">
       </div>
       <div class="field-input">
         <label for="fsu-turnovers">Offensive Turnovers</label>
-        <input type="number" id="fsu-turnovers" placeholder="e.g. 1">
+        <input type="number" id="fsu-turnovers" min="0" step="1" placeholder="e.g. 1">
       </div>
     </div>
 
@@ -330,15 +330,15 @@
       </div>
       <div class="field-input">
         <label for="vis-points-for">Points For</label>
-        <input type="number" id="vis-points-for" placeholder="e.g. 24">
+        <input type="number" id="vis-points-for" min="0" step="1" placeholder="e.g. 24">
       </div>
       <div class="field-input">
         <label for="vis-points-against">Points Against</label>
-        <input type="number" id="vis-points-against" placeholder="e.g. 21">
+        <input type="number" id="vis-points-against" min="0" step="1" placeholder="e.g. 21">
       </div>
       <div class="field-input">
         <label for="vis-turnovers">Offensive Turnovers</label>
-        <input type="number" id="vis-turnovers" placeholder="e.g. 2">
+        <input type="number" id="vis-turnovers" min="0" step="1" placeholder="e.g. 2">
       </div>
     </div>
   </div>
@@ -358,40 +358,65 @@
   </div>
 
   <script>
-    function getValue(id) {
+    function getValue(id, allowNegative = false) {
       const value = parseFloat(document.getElementById(id).value);
-      return Number.isNaN(value) ? 0 : value;
+      if (Number.isNaN(value)) {
+        return 0;
+      }
+
+      if (allowNegative) {
+        return value;
+      }
+
+      return Math.max(0, value);
     }
 
-    // Simple heuristic rating: rewards yardage and point margins, penalizes turnovers
+    function getNonNegativeValue(id) {
+      return Math.max(0, getValue(id, false));
+    }
+
+    // Holistic team rating: balances yards, scoring, and turnover impact without letting
+    // one category dominate the whole prediction.
     function computeRating(offYards, defYardsAllowed, pointsFor, pointsAgainst, turnovers) {
       const yardMargin = offYards - defYardsAllowed;
       const pointMargin = pointsFor - pointsAgainst;
-      return (yardMargin * 0.05) + (pointMargin * 1.5) - (turnovers * 4);
+      const turnoverPenalty = turnovers * 6;
+
+      return (yardMargin * 0.06) + (pointMargin * 1.2) - turnoverPenalty;
     }
+
+    ['fsu-points-for', 'fsu-points-against', 'fsu-turnovers', 'vis-points-for', 'vis-points-against', 'vis-turnovers']
+      .forEach((id) => {
+        const input = document.getElementById(id);
+        input.addEventListener('input', () => {
+          if (Number(input.value) < 0) {
+            input.value = 0;
+          }
+        });
+      });
 
     document.getElementById('predictBtn').addEventListener('click', () => {
       const fsuRating = computeRating(
-        getValue('fsu-off-yards'),
-        getValue('fsu-def-yards'),
-        getValue('fsu-points-for'),
-        getValue('fsu-points-against'),
-        getValue('fsu-turnovers')
+        getValue('fsu-off-yards', true),
+        getValue('fsu-def-yards', true),
+        getNonNegativeValue('fsu-points-for'),
+        getNonNegativeValue('fsu-points-against'),
+        getNonNegativeValue('fsu-turnovers')
       );
 
       const visRating = computeRating(
-        getValue('vis-off-yards'),
-        getValue('vis-def-yards'),
-        getValue('vis-points-for'),
-        getValue('vis-points-against'),
-        getValue('vis-turnovers')
+        getValue('vis-off-yards', true),
+        getValue('vis-def-yards', true),
+        getNonNegativeValue('vis-points-for'),
+        getNonNegativeValue('vis-points-against'),
+        getNonNegativeValue('vis-turnovers')
       );
 
       const diff = fsuRating - visRating;
-      // Logistic curve converts the rating gap into a win probability
       const fsuProbability = 1 / (1 + Math.exp(-diff / 25));
       const fsuPercent = Math.min(99, Math.max(1, Math.round(fsuProbability * 100)));
       const visPercent = 100 - fsuPercent;
+      const spread = Math.max(1, Math.min(12, Math.round(Math.abs(diff) / 18 * 2) / 2));
 
       document.getElementById('fsuFill').style.width = `${fsuPercent}%`;
       document.getElementById('fsuPct').textContent = `FSU ${fsuPercent}%`;
@@ -399,13 +424,13 @@
 
       const winCall = document.getElementById('winCall');
       if (fsuPercent > visPercent) {
-        winCall.textContent = "'Dogs favored to win! ????";
+        winCall.textContent = `Fresno State projected to win by ${spread.toFixed(1)}. Dogs -${spread.toFixed(1)}`;
         winCall.style.color = '#C41230';
       } else if (visPercent > fsuPercent) {
-        winCall.textContent = 'Visiting team favored.';
+        winCall.textContent = `Visitor projected to win by ${spread.toFixed(1)}. Dogs +${spread.toFixed(1)}`;
         winCall.style.color = '#7fa0d6';
       } else {
-        winCall.textContent = "Too close to call!";
+        winCall.textContent = 'Pick em';
         winCall.style.color = '#fff';
       }
 
